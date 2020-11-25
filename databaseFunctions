@@ -17,6 +17,7 @@ function addForm() {
   
   var addHtml = addTemplate.evaluate();
   addHtml.setHeight(500).setWidth(800);//
+  
   SpreadsheetApp.getUi().showModalDialog(addHtml,"Add Phoenix Shelter Friends");
   //showSidebar(html);
   
@@ -32,15 +33,36 @@ function searchForm() {
   
 }
 
+function editForm(eventItem) {
+ var cache = CacheService.getScriptCache();
+          cache.put('selectedIndex', eventItem);
+  var test = cache.get('selectedIndex');
+  
+/*var ws = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  ws.appendRow([test]);//console.log(eventItem);
+  //return eventItem;*/
+ 
+ 
+  var editTemplate = HtmlService.createTemplateFromFile("editUI");
+  
+  var editHtml = editTemplate.evaluate();
+  //editTemplate.append('Hello World');
+  editHtml.setHeight(500).setWidth(800);//
+  SpreadsheetApp.getUi().showModalDialog(editHtml,"Add Phoenix Shelter Friends");
+  //showSidebar(html);*/
+  
+}
 
 function appendData(data){
  var ws = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  ws.appendRow([data.nameF,data.nameL,data.workerNotes]);
+  var dataID= ws.getLastRow() + 1;
+  ws.appendRow([dataID,data.nameF,data.nameL,data.workerNotes]);
+  
 }
 // NEW
 
 function searchUpdate(){
-  Logger.clear();
+  //Logger.clear();
     var datasheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
     var dataValues = datasheet.getDataRange().getValues();
 //  Logger.log(dataValues[1][1]);
@@ -56,6 +78,15 @@ function getData(){
    var columnBound = datasheet.getLastColumn();
    var dataValues = datasheet.getRange(3,1,rowBound,columnBound).getValues();
   return dataValues;
+}
+function selectedData(){
+ var ws = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+   var cache = CacheService.getScriptCache();
+  var selectedRange = cache.get('selectedIndex');
+  var selection = ws.getRange(selectedRange).getValues();
+ // ws.appendRow([dataID,data.nameF,data.nameL,data.workerNotes]);
+  return selection;
+  
 }
 /*References:
 https://www.youtube.com/watch?v=4Hz36tiqEPE
