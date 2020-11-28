@@ -1,6 +1,11 @@
 <!DOCTYPE html>
   <html>
     <head>
+    <!--<style>
+    .hidden{
+        display: initial;
+        }
+    </style>-->
       <!--Import Google Icon Font-->
       <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
       <!-- Compiled and minified CSS -->
@@ -16,40 +21,54 @@
       <div class="row">
       
       <!--NEW-->
-        <div class="input-field col s6">
+        <div class="input-field col">
           <button class="btn waves-effect waves-light" id = "searchBtn">Search
              <i class="material-icons right">search</i>
           </button>
         </div>
-        <div class="input-field col s6">
-          <button class="btn waves-effect waves-light" id = "addBtn">Add
-             <i class="material-icons right">add</i>
-          </button>
-        </div>
+        
       </div>
       <!--NEW-->
-      <div class="row">
-      <h6 class="card-panel teal lighten-2">First Name</h6>
- 
-          <p id="firstName" class="flow-text">Loading...
-          </p>
-        <h6 class="card-panel teal lighten-2">Last Name</h6>
-          <p id="lastName" class="flow-text">Loading...
-          </p>
-        
-     <h6 class="card-panel teal lighten-2">Notes</h6>
-          <p id="notes" class="flow-text">Loading...
-          </p>
+      <div class="row black-text">
+      <div name = "entryField">
+       <div class="input-field col s12">
+         <input disabled value="Loading..." id="firstName" type="text" class="validate">
+          <label class="active" for="firstName">First Name</label>
+           </div>
+          </div>
+          
+           <div name = "entryField">
+           <div class="input-field col s12">
+          <input disabled value="Loading..." id="lastName" type="text" class="validate">
+          <label class="active" for="lastName">Last Name</label>
+           </div>
+          </div>
+          
+           <div name = "entryField">
+           <div class="input-field col s12">
+          <input disabled value="Loading..." id="notes" type="text" class="validate">
+          <label class="active" for="notes">Notes</label>
+          </div>
+          </div>
+         
        </div>
         
         <div class="row">
-         <div class="input-field col s12">
-          <button class="btn waves-effect waves-light" id = "btn">Add
-             <i class="material-icons right">send</i>
+         <div class="input-field col">
+          <button class="btn waves-effect waves-light" id = "editBtn">Edit
+             <i class="material-icons right">edit</i>
           </button>
         </div>
-
+        
+<div class="input-field col">
+          <button class="btn waves-effect waves-light red lighten-2" id = "deleteBtn">Delete
+             <i class="material-icons right">delete</i>
+          </button>
+        </div>
+        
       </div><!-- END ROW-->
+       <div class="row" name = "extraBtns">
+       </div>
    </div> <!--END CONTAINER-->
   
           
@@ -58,24 +77,135 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
     <script>
      google.script.run.withSuccessHandler(setEntry).selectedData();
-     
+     google.script.run.withSuccessHandler(storeRange).selectedNotation()
+     var entryData = [];
+     var editState = false;
+     var storedRange = ""; //store selected range here. 
+     function storeRange(arange){
+     storedRange = arange;
+
+     }
      function setEntry(data){
      
      //var test = document.getElementById("testing");
     var firstNameBox = document.getElementById("firstName");
     var lastNameBox = document.getElementById("lastName");
     var notesBox = document.getElementById("notes");  
-     firstNameBox.innerHTML = data[0][1];
-     lastNameBox.innerHTML = data[0][2];
-     notesBox.innerHTML = data[0][3];
+     firstNameBox.value = data[0][1];
+     lastNameBox.value = data[0][2];
+     notesBox.value = data[0][3];
+     entryData=data;
    //  console.log(typeof data[0][3].trim());
         }
         
     document.getElementById("searchBtn").addEventListener("click",searchTrigger);
-       
+    document.getElementById("editBtn").addEventListener("click",editTrigger);
+    document.getElementById("deleteBtn").addEventListener("click",deleteTrigger);
+
     function searchTrigger(){
-      google.script.run.searchForm();
+      if (editState == false){
+        google.script.run.searchForm();
       }
+      else{
+      M.toast ({html: 'Please save edits or cancel.'});
+      }
+      
+      }
+      
+      //HERE
+    function editTrigger(){
+     editState = true;
+     var elems = document.getElementsByName("entryField");
+  
+     var firstEdit = '<div class="input-field col s12"><input   id="firstName" type="text" class="validate"><label class="active" for="firstName">First Name</label></div>';
+       var lastEdit = '<div class="input-field col s12"><input  id="lastName" type="text" class="validate"><label class="active" for="lastName">Last Name</label></div>';
+     var notesEdit = '<div class="input-field col s12"><input  id="notes" type="text" class="validate"><label class="active" for="notes">Notes</label></div>';
+
+      elems[0].innerHTML = firstEdit;
+      elems[1].innerHTML = lastEdit;
+      elems[2].innerHTML = notesEdit;
+
+     
+     var extras = document.getElementsByName("extraBtns");
+     
+     var saveButton= '<div class="input-field col"><button class="btn waves-effect waves-light" id = "saveBtn">Save<i class="material-icons right">save</i></button></div>'
+     var cancelButton= '<div class="input-field col"><button class="btn waves-effect waves-light red lighten-2" id = "cancelBtn">Cancel<i class="material-icons right">cancel</i></button></div>'
+     extras[0].innerHTML= saveButton + cancelButton;
+     
+    document.getElementById("saveBtn").addEventListener("click",saveTrigger);
+    document.getElementById("cancelBtn").addEventListener("click",cancelTrigger);
+     
+            setEntry(entryData);
+
+          
+     }
+     
+    function deleteTrigger(){
+    if (editState == false){
+       // M.toast ({html: 'Entry Deleted'});    
+       // google.script.run.deleteCells(storedRange);
+      // google.script.run.searchForm();
+        google.script.run.showAlert(storedRange);
+      /*var confirmation = google.script.run.showAlert();
+      if (confirmation == true){
+        M.toast ({html: 'Entry Deleted'});    
+        google.script.run.deleteCells(storedRange);
+        google.script.run.searchForm();
+        }
+       
+      if (confirmation == false) {
+      google.script.run.editReturn(storedRange);
+      }*/
+     
+      }
+      else{
+      M.toast ({html: 'Please save edits or cancel.'});
+      }
+    }
+    
+    function saveTrigger(){
+    editState= false;
+    var firstNameBox = document.getElementById("firstName");
+    var lastNameBox = document.getElementById("lastName");
+    var notesBox = document.getElementById("notes");  
+     entryData[0][1]= firstNameBox.value;
+     entryData[0][2] = lastNameBox.value;
+     entryData[0][3] = notesBox.value;
+     var extras = document.getElementsByName("extraBtns");
+     extras[0].innerHTML = "";
+     
+     
+     var elems = document.getElementsByName("entryField");
+     var firstReset ='  <div class="input-field col s12"><input disabled value="Loading..." id="firstName" type="text" class="validate"><label class="active" for="firstName">First Name</label></div></div>'  
+     var lastReset = '  <div class="input-field col s12"><input disabled value="Loading..." id="lastName" type="text" class="validate"><label class="active" for="lastName">Last Name</label></div></div>'
+     var notesReset = '  <div class="input-field col s12"><input disabled value="Loading..." id="notes" type="text" class="validate"><label class="active" for="notes">Notes</label></div></div>'
+     elems[0].innerHTML = firstReset;
+      elems[1].innerHTML = lastReset;
+      elems[2].innerHTML = notesReset;
+     // console.log(entryData[0]);
+      //console.log(typeof storedRange);
+     setEntry(entryData);
+     M.toast ({html: 'Changes Saved'});
+    google.script.run.editData(entryData[0],storedRange);
+
+    }
+    function cancelTrigger(){
+      editState= false;
+
+     var extras = document.getElementsByName("extraBtns");
+     extras[0].innerHTML = "";
+     
+    var elems = document.getElementsByName("entryField");
+    var firstReset ='  <div class="input-field col s12"><input disabled value="Loading..." id="firstName" type="text" class="validate"><label class="active" for="firstName">First Name</label></div></div>'  
+     var lastReset = '  <div class="input-field col s12"><input disabled value="Loading..." id="lastName" type="text" class="validate"><label class="active" for="lastName">Last Name</label></div></div>'
+     var notesReset = '  <div class="input-field col s12"><input disabled value="Loading..." id="notes" type="text" class="validate"><label class="active" for="notes">Notes</label></div></div>'
+      elems[0].innerHTML = firstReset;
+      elems[1].innerHTML = lastReset;
+      elems[2].innerHTML = notesReset;
+     setEntry(entryData);
+    }
+
+    
 /*
     
     }
